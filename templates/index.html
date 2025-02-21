@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send WhatsApp Message</title>
+</head>
+<body>
+    <h1>Send WhatsApp Message</h1>
+    <form id="whatsappForm">
+        <label for="phone">Phone Number:</label>
+        <input type="text" id="phone" name="phone" placeholder="+1234567890" required>
+        <label for="message">Message:</label>
+        <textarea id="message" name="message" placeholder="Enter your message..." required></textarea>
+        <button type="submit">Send Message</button>
+    </form>
+    <button onclick="logout()">Logout</button>
+
+    <script>
+        document.getElementById("whatsappForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const phone = document.getElementById("phone").value;
+            const message = document.getElementById("message").value;
+
+            fetch("/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone, message })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.status || data.error))
+            .catch(error => console.error("Error:", error));
+        });
+
+        function logout() {
+            window.location.href = "/logout";
+        }
+    </script>
+</body>
+</html>

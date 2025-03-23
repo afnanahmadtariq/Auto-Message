@@ -2,3 +2,6 @@ Flask==3.0.0
 Flask-Session==0.4.0
 selenium==4.17.2
 webdriver-manager==4.0.1
+pymongo==4.6.1  # For MongoDB integration
+google-auth-oauthlib==1.0.0  # For Google Sign-In
+pyotp==2.8.0  # For 2FA with TOTP

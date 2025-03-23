@@ -3,36 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
     <title>Send WhatsApp Message</title>
 </head>
 <body>
     <h1>Send WhatsApp Message</h1>
+
+    <!-- Recent Contacts -->
+    <div id="recent-contacts">
+        <h2>Recent Contacts</h2>
+        <ul>
+            {% for contact in recent_contacts %}
+                <li onclick="selectContact('{{ contact.name }}', '{{ contact.phone }}')">{{ contact.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Contact Search -->
+    <div>
+        <input type="text" id="search" placeholder="Search contacts...">
+        <button onclick="searchContacts()">Search</button>
+        <ul id="search-results"></ul>
+    </div>
+
+    <!-- Message Form -->
     <form id="whatsappForm">
         <label for="phone">Phone Number:</label>
         <input type="text" id="phone" name="phone" placeholder="+1234567890" required>
         <label for="message">Message:</label>
         <textarea id="message" name="message" placeholder="Enter your message..." required></textarea>
+        <label for="repeat">Repeat Message (times):</label>
+        <input type="number" id="repeat" name="repeat" value="1" min="1">
         <button type="submit">Send Message</button>
     </form>
     <button onclick="logout()">Logout</button>
 
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div id="loading-text">Loading...</div>
+    </div>
+
     <script>
+        function showLoading(text) {
+            document.getElementById("loading-overlay").style.display = "flex";
+            document.getElementById("loading-text").innerText = text;
+            document.querySelectorAll("button").forEach(btn => btn.disabled = true);
+        }
+
+        function hideLoading() {
+            document.getElementById("loading-overlay").style.display = "none";
+            document.querySelectorAll("button").forEach(btn => btn.disabled = false);
+        }
+
+        function selectContact(name, phone) {
+            document.getElementById("phone").value = phone;
+        }
+
+        function searchContacts() {
+            const query = document.getElementById("search").value;
+            showLoading("Searching contacts...");
+            fetch("/search_contacts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                const results = document.getElementById("search-results");
+                results.innerHTML = "";
+                if (data.contacts) {
+                    data.contacts.forEach(contact => {
+                        const li = document.createElement("li");
+                        li.innerText = contact.name;
+                        li.onclick = () => selectContact(contact.name, contact.phone);
+                        results.appendChild(li);
+                    });
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                console.error("Error:", error);
+            });
+        }
+
         document.getElementById("whatsappForm").addEventListener("submit", function (event) {
             event.preventDefault();
             const phone = document.getElementById("phone").value;
             const message = document.getElementById("message").value;
+            const repeat = document.getElementById("repeat").value;
 
+            showLoading("Sending message...");
             fetch("/send", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone, message })
+                body: JSON.stringify({ phone, message, repeat })
             })
             .then(response => response.json())
-            .then(data => alert(data.status || data.error))
-            .catch(error => console.error("Error:", error));
+            .then(data => {
+                hideLoading();
+                alert(data.status || data.error);
+            })
+            .catch(error => {
+                hideLoading();
+                console.error("Error:", error);
+            });
         });
 
         function logout() {
+            showLoading("Logging out...");
             window.location.href = "/logout";
         }
     </script>

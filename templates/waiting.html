@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+    <title>Scan QR Code</title>
+</head>
+<body>
+    <h1>Scan the QR Code in WhatsApp Web</h1>
+    <p>Once logged in, you'll be redirected automatically.</p>
+
+    <div id="loading-overlay">
+        <div id="loading-text">Loading WhatsApp...</div>
+    </div>
+
+    <script>
+        function showLoading(text) {
+            document.getElementById("loading-overlay").style.display = "flex";
+            document.getElementById("loading-text").innerText = text;
+        }
+
+        function hideLoading() {
+            document.getElementById("loading-overlay").style.display = "none";
+        }
+
+        showLoading("Loading WhatsApp...");
+
+        function checkLogin() {
+            fetch("/check_login")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.logged_in) {
+                        showLoading("Redirecting to dashboard...");
+                        window.location.href = "/dashboard";
+                    } else {
+                        setTimeout(checkLogin, 3000);
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    console.error("Error:", error);
+                });
+        }
+
+        checkLogin();
+    </script>
+</body>
+</html>

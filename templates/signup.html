@@ -4,21 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/static/styles.css">
-  <title>Log In to WhatsApp</title>
+  <title>Sign Up for WhatsApp</title>
 </head>
 <body>
-  <h1>Log In to WhatsApp</h1>
-  <p>Log in using your primary or secondary authentication method.</p>
-  <p>Don't have an account? <a href="/signup" class="nav-link">Sign up here</a></p>
+  <h1>Sign Up for WhatsApp</h1>
+  <p>Choose your primary authentication method to create an account.</p>
+  <p>Already have an account? <a href="/login" class="nav-link">Log in here</a></p>
 
   <!-- Google Sign-In Button -->
-  <button class="google-btn" onclick="loginWithGoogle()">
-    <img src="/static/google-logo.png" alt="Google Logo"> Sign in with Google
+  <button class="google-btn" onclick="signupWithGoogle()">
+    <img src="/static/google-logo.png" alt="Google Logo"> Sign up with Google
   </button>
 
-  <!-- 2FA Login Form -->
-  <form id="loginForm">
-    <label for="auth_method">Or Log In with 2FA:</label>
+  <!-- 2FA Signup Form -->
+  <form id="signupForm">
+    <label for="auth_method">Or Sign Up with 2FA:</label>
     <select name="auth_method" id="auth_method" required onchange="updateForm()">
       <option value="">--Select--</option>
       <option value="2fa">2FA Authenticator</option>
@@ -31,7 +31,7 @@
 
     <div id="method-explanation" style="margin: 10px 0; color: #555;"></div>
 
-    <button type="submit">Log In</button>
+    <button type="submit">Sign Up</button>
   </form>
 
   <!-- Loading Overlay -->
@@ -62,16 +62,16 @@
         authInputDiv.style.display = "block";
         identifierLabel.innerText = "2FA Token:";
         identifierInput.placeholder = "Enter your 2FA token";
-        explanationDiv.innerText = "2FA Authenticator: Enter the token from your TOTP app (e.g., Google Authenticator).";
+        explanationDiv.innerText = "2FA Authenticator: Use a TOTP app (e.g., Google Authenticator) to generate a token. You'll be given a secret to scan after submitting.";
       } else {
         authInputDiv.style.display = "none";
         explanationDiv.innerText = "";
       }
     }
 
-    function loginWithGoogle() {
+    function signupWithGoogle() {
       showLoading("Redirecting to Google...");
-      fetch("/login", {
+      fetch("/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ auth_method: "google" })
@@ -82,17 +82,17 @@
           window.location.href = data.redirect;
         } else {
           hideLoading();
-          alert(data.error || "An error occurred during login.");
+          alert(data.error || "An error occurred during signup.");
         }
       })
       .catch(error => {
         hideLoading();
         console.error("Error:", error);
-        alert("An error occurred during login.");
+        alert("An error occurred during signup.");
       });
     }
 
-    document.getElementById("loginForm").addEventListener("submit", function (event) {
+    document.getElementById("signupForm").addEventListener("submit", function (event) {
       event.preventDefault();
       const authMethod = document.getElementById("auth_method").value;
       const identifier = document.getElementById("identifier").value;
@@ -102,9 +102,9 @@
         return;
       }
 
-      showLoading("Verifying 2FA token...");
+      showLoading("Processing signup...");
 
-      fetch("/login", {
+      fetch("/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ auth_method, identifier })
@@ -114,6 +114,9 @@
         hideLoading();
         if (data.error) {
           alert(data.error);
+        } else if (data.message && data.secret) {
+          alert(`${data.message}\nSecret: ${data.secret}`);
+          document.getElementById("identifier").value = "";
         } else {
           window.location.href = "/waiting";
         }
@@ -121,7 +124,7 @@
       .catch(error => {
         hideLoading();
         console.error("Error:", error);
-        alert("An error occurred during login.");
+        alert("An error occurred during signup.");
       });
     });
   </script>

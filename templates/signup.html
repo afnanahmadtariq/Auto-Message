@@ -1,132 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/styles.css">
-  <title>Sign Up for WhatsApp</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/styles.css">
+    <title>Sign Up for Autometa</title>
 </head>
 <body>
-  <h1>Sign Up for WhatsApp</h1>
-  <p>Choose your primary authentication method to create an account.</p>
-  <p>Already have an account? <a href="/login" class="nav-link">Log in here</a></p>
+    <h1>Sign Up for Autometa</h1>
+    <p>Choose a method to create your account.</p>
+    <p>Already have an account? <a href="/auth/login" class="nav-link">Log in here</a></p>
 
-  <!-- Google Sign-In Button -->
-  <button class="google-btn" onclick="signupWithGoogle()">
-    <img src="/static/google-logo.png" alt="Google Logo"> Sign up with Google
-  </button>
-
-  <!-- 2FA Signup Form -->
-  <form id="signupForm">
-    <label for="auth_method">Or Sign Up with 2FA:</label>
-    <select name="auth_method" id="auth_method" required onchange="updateForm()">
-      <option value="">--Select--</option>
-      <option value="2fa">2FA Authenticator</option>
-    </select>
-
-    <div id="auth-input" style="display: none;">
-      <label id="identifier-label" for="identifier">2FA Token:</label>
-      <input type="text" name="identifier" id="identifier" placeholder="Enter your 2FA token" required>
+    <div>
+        <h3>Sign Up with Google</h3>
+        <p>Use your Google account to sign up securely.</p>
+        <button class="google-btn" onclick="signupWithGoogle()">
+            <img src="/static/google-logo.png" alt="Google Logo"> Sign up with Google
+        </button>
     </div>
 
-    <div id="method-explanation" style="margin: 10px 0; color: #555;"></div>
+    <div>
+        <h3>Sign Up with 2FA Authenticator</h3>
+        <p>Use a TOTP app (e.g., Google Authenticator) to set up 2FA.</p>
+        <form id="2faSignupForm">
+            <label for="2fa_identifier">Identifier (e.g., your email):</label>
+            <input type="text" id="2fa_identifier" name="identifier" placeholder="Enter an identifier" required>
+            <button type="submit">Get 2FA QR Code</button>
+        </form>
 
-    <button type="submit">Sign Up</button>
-  </form>
+        <div id="2faSetup" style="display: none;">
+            <h3>Scan the QR Code</h3>
+            <p>Use your authenticator app to scan the QR code below, or manually enter the secret: <span id="2faSecret"></span></p>
+            <img id="2faQrCode" src="" alt="2FA QR Code">
+            <form id="2faVerifyForm">
+                <label for="2fa_token">Enter 2FA Token:</label>
+                <input type="text" id="2fa_token" name="token" placeholder="Enter the 6-digit token" required>
+                <button type="submit">Verify 2FA</button>
+            </form>
+        </div>
+    </div>
 
-  <!-- Loading Overlay -->
-  <div id="loading-overlay">
-    <div id="loading-text">Loading...</div>
-  </div>
+    <div id="loading-overlay">
+        <div id="loading-text">Loading...</div>
+    </div>
 
-  <script>
-    function showLoading(text) {
-      document.getElementById("loading-overlay").style.display = "flex";
-      document.getElementById("loading-text").innerText = text;
-      document.querySelectorAll("button").forEach(btn => btn.disabled = true);
-    }
-
-    function hideLoading() {
-      document.getElementById("loading-overlay").style.display = "none";
-      document.querySelectorAll("button").forEach(btn => btn.disabled = false);
-    }
-
-    function updateForm() {
-      const authMethod = document.getElementById("auth_method").value;
-      const authInputDiv = document.getElementById("auth-input");
-      const identifierInput = document.getElementById("identifier");
-      const identifierLabel = document.getElementById("identifier-label");
-      const explanationDiv = document.getElementById("method-explanation");
-
-      if (authMethod === "2fa") {
-        authInputDiv.style.display = "block";
-        identifierLabel.innerText = "2FA Token:";
-        identifierInput.placeholder = "Enter your 2FA token";
-        explanationDiv.innerText = "2FA Authenticator: Use a TOTP app (e.g., Google Authenticator) to generate a token. You'll be given a secret to scan after submitting.";
-      } else {
-        authInputDiv.style.display = "none";
-        explanationDiv.innerText = "";
-      }
-    }
-
-    function signupWithGoogle() {
-      showLoading("Redirecting to Google...");
-      fetch("/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ auth_method: "google" })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.redirect) {
-          window.location.href = data.redirect;
-        } else {
-          hideLoading();
-          alert(data.error || "An error occurred during signup.");
-        }
-      })
-      .catch(error => {
-        hideLoading();
-        console.error("Error:", error);
-        alert("An error occurred during signup.");
-      });
-    }
-
-    document.getElementById("signupForm").addEventListener("submit", function (event) {
-      event.preventDefault();
-      const authMethod = document.getElementById("auth_method").value;
-      const identifier = document.getElementById("identifier").value;
-
-      if (!authMethod || !identifier) {
-        alert("Please select an authentication method and provide the required details.");
-        return;
-      }
-
-      showLoading("Processing signup...");
-
-      fetch("/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ auth_method, identifier })
-      })
-      .then(response => response.json())
-      .then(data => {
-        hideLoading();
-        if (data.error) {
-          alert(data.error);
-        } else if (data.message && data.secret) {
-          alert(`${data.message}\nSecret: ${data.secret}`);
-          document.getElementById("identifier").value = "";
-        } else {
-          window.location.href = "/waiting";
-        }
-      })
-      .catch(error => {
-        hideLoading();
-        console.error("Error:", error);
-        alert("An error occurred during signup.");
-      });
-    });
-  </script>
+    <script src="/static/scripts/signup.js"></script>
 </body>
 </html>

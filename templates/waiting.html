@@ -4,46 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/styles.css">
-    <title>Scan QR Code</title>
+    <title>Scan QR Code - Autometa</title>
 </head>
 <body>
-    <h1>Scan the QR Code in WhatsApp Web</h1>
-    <p>Once logged in, you'll be redirected automatically.</p>
+    <h1>Scan the QR Code to Log In to WhatsApp</h1>
+    <p>Use the WhatsApp app on your phone to scan the QR code below. You will be redirected automatically once logged in.</p>
 
-    <div id="loading-overlay">
-        <div id="loading-text">Loading WhatsApp...</div>
-    </div>
+    {% if qr_code_base64 %}
+        <img id="qrCode" src="data:image/png;base64,{{ qr_code_base64 }}" alt="WhatsApp QR Code">
+    {% else %}
+        <p>Failed to load QR code. Please try again.</p>
+    {% endif %}
 
-    <script>
-        function showLoading(text) {
-            document.getElementById("loading-overlay").style.display = "flex";
-            document.getElementById("loading-text").innerText = text;
-        }
-
-        function hideLoading() {
-            document.getElementById("loading-overlay").style.display = "none";
-        }
-
-        showLoading("Loading WhatsApp...");
-
-        function checkLogin() {
-            fetch("/check_login")
-                .then(response => response.json())
-                .then(data => {
-                    if (data.logged_in) {
-                        showLoading("Redirecting to dashboard...");
-                        window.location.href = "/dashboard";
-                    } else {
-                        setTimeout(checkLogin, 3000);
-                    }
-                })
-                .catch(error => {
-                    hideLoading();
-                    console.error("Error:", error);
-                });
-        }
-
-        checkLogin();
-    </script>
+    <script src="/static/scripts/waiting.js"></script>
 </body>
 </html>

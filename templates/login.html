@@ -1,129 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/styles.css">
-  <title>Log In to WhatsApp</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/styles.css">
+    <title>Log In to Autometa</title>
 </head>
 <body>
-  <h1>Log In to WhatsApp</h1>
-  <p>Log in using your primary or secondary authentication method.</p>
-  <p>Don't have an account? <a href="/signup" class="nav-link">Sign up here</a></p>
+    <h1>Log In to Autometa</h1>
+    <p>Log in using one of the standalone methods below.</p>
+    <p>Don't have an account? <a href="/auth/signup" class="nav-link">Sign up here</a></p>
 
-  <!-- Google Sign-In Button -->
-  <button class="google-btn" onclick="loginWithGoogle()">
-    <img src="/static/google-logo.png" alt="Google Logo"> Sign in with Google
-  </button>
-
-  <!-- 2FA Login Form -->
-  <form id="loginForm">
-    <label for="auth_method">Or Log In with 2FA:</label>
-    <select name="auth_method" id="auth_method" required onchange="updateForm()">
-      <option value="">--Select--</option>
-      <option value="2fa">2FA Authenticator</option>
-    </select>
-
-    <div id="auth-input" style="display: none;">
-      <label id="identifier-label" for="identifier">2FA Token:</label>
-      <input type="text" name="identifier" id="identifier" placeholder="Enter your 2FA token" required>
+    <div>
+        <h3>Sign In with Google</h3>
+        <p>Use your Google account to log in securely.</p>
+        <button class="google-btn" onclick="loginWithGoogle()">
+            <img src="/static/google-logo.png" alt="Google Logo"> Sign in with Google
+        </button>
     </div>
 
-    <div id="method-explanation" style="margin: 10px 0; color: #555;"></div>
+    <div>
+        <h3>Sign In with 2FA Authenticator</h3>
+        <p>Enter the token from your TOTP app (e.g., Google Authenticator).</p>
+        <form id="2faLoginForm">
+            <label for="2fa_identifier">Identifier (used during signup):</label>
+            <input type="text" id="2fa_identifier" name="identifier" placeholder="Enter your identifier" required>
+            <label for="2fa_token">2FA Token:</label>
+            <input type="text" id="2fa_token" name="token" placeholder="Enter the 6-digit token" required>
+            <button type="submit">Sign In with 2FA</button>
+        </form>
+    </div>
 
-    <button type="submit">Log In</button>
-  </form>
+    <div id="loading-overlay">
+        <div id="loading-text">Loading...</div>
+    </div>
 
-  <!-- Loading Overlay -->
-  <div id="loading-overlay">
-    <div id="loading-text">Loading...</div>
-  </div>
-
-  <script>
-    function showLoading(text) {
-      document.getElementById("loading-overlay").style.display = "flex";
-      document.getElementById("loading-text").innerText = text;
-      document.querySelectorAll("button").forEach(btn => btn.disabled = true);
-    }
-
-    function hideLoading() {
-      document.getElementById("loading-overlay").style.display = "none";
-      document.querySelectorAll("button").forEach(btn => btn.disabled = false);
-    }
-
-    function updateForm() {
-      const authMethod = document.getElementById("auth_method").value;
-      const authInputDiv = document.getElementById("auth-input");
-      const identifierInput = document.getElementById("identifier");
-      const identifierLabel = document.getElementById("identifier-label");
-      const explanationDiv = document.getElementById("method-explanation");
-
-      if (authMethod === "2fa") {
-        authInputDiv.style.display = "block";
-        identifierLabel.innerText = "2FA Token:";
-        identifierInput.placeholder = "Enter your 2FA token";
-        explanationDiv.innerText = "2FA Authenticator: Enter the token from your TOTP app (e.g., Google Authenticator).";
-      } else {
-        authInputDiv.style.display = "none";
-        explanationDiv.innerText = "";
-      }
-    }
-
-    function loginWithGoogle() {
-      showLoading("Redirecting to Google...");
-      fetch("/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ auth_method: "google" })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.redirect) {
-          window.location.href = data.redirect;
-        } else {
-          hideLoading();
-          alert(data.error || "An error occurred during login.");
-        }
-      })
-      .catch(error => {
-        hideLoading();
-        console.error("Error:", error);
-        alert("An error occurred during login.");
-      });
-    }
-
-    document.getElementById("loginForm").addEventListener("submit", function (event) {
-      event.preventDefault();
-      const authMethod = document.getElementById("auth_method").value;
-      const identifier = document.getElementById("identifier").value;
-
-      if (!authMethod || !identifier) {
-        alert("Please select an authentication method and provide the required details.");
-        return;
-      }
-
-      showLoading("Verifying 2FA token...");
-
-      fetch("/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ auth_method, identifier })
-      })
-      .then(response => response.json())
-      .then(data => {
-        hideLoading();
-        if (data.error) {
-          alert(data.error);
-        } else {
-          window.location.href = "/waiting";
-        }
-      })
-      .catch(error => {
-        hideLoading();
-        console.error("Error:", error);
-        alert("An error occurred during login.");
-      });
-    });
-  </script>
+    <script src="/static/scripts/login.js"></script>
 </body>
 </html>

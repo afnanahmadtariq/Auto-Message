@@ -5,13 +5,9 @@ body {
     background-color: #f4f4f4;
 }
 
-h1 {
-    color: #333;
-}
-
-p {
-    color: #555;
-}
+h1 { color: #333; }
+h2, h3 { color: #444; margin-top: 20px; }
+p { color: #555; }
 
 form {
     display: inline-block;
@@ -21,6 +17,7 @@ form {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
+    margin: 10px auto;
 }
 
 label {
@@ -49,16 +46,9 @@ button {
     margin: 10px 0;
 }
 
-button:hover {
-    background: darkgreen;
-}
+button:hover { background: darkgreen; }
+button:disabled { background: gray; cursor: not-allowed; }
 
-button:disabled {
-    background: gray;
-    cursor: not-allowed;
-}
-
-/* Google Sign-In Button */
 .google-btn {
     display: flex;
     align-items: center;
@@ -83,11 +73,8 @@ button:disabled {
     margin-right: 10px;
 }
 
-.google-btn:hover {
-    background: #f8f8f8;
-}
+.google-btn:hover { background: #f8f8f8; }
 
-/* Loading Overlay */
 #loading-overlay {
     position: fixed;
     top: 0;
@@ -108,16 +95,8 @@ button:disabled {
     font-size: 18px;
 }
 
-/* Recent Contacts (for index.html) */
-#recent-contacts {
-    margin: 20px 0;
-}
-
-#recent-contacts ul {
-    list-style: none;
-    padding: 0;
-}
-
+#recent-contacts { margin: 20px 0; }
+#recent-contacts ul { list-style: none; padding: 0; }
 #recent-contacts li {
     background: white;
     padding: 10px;
@@ -125,18 +104,19 @@ button:disabled {
     border-radius: 5px;
     cursor: pointer;
 }
+#recent-contacts li:hover { background: #e0e0e0; }
 
-#recent-contacts li:hover {
-    background: #e0e0e0;
-}
-
-/* Links for navigation between signup and login */
 .nav-link {
     margin: 10px;
     color: #007bff;
     text-decoration: none;
 }
+.nav-link:hover { text-decoration: underline; }
 
-.nav-link:hover {
-    text-decoration: underline;
+#2faQrCode {
+    display: block;
+    margin: 10px auto;
+    max-width: 200px;
 }
+
+#2faSecret { font-weight: bold; color: #333; }
